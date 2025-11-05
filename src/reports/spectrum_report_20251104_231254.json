@@ -1,0 +1,47 @@
+{
+  "sistema": "SPECTRUM - Ferramenta de Análise e Correção de Imagens",
+  "data_geracao": "2025-11-04 23:12:54",
+  "total_operacoes": 4,
+  "tipos_operacao": {
+    "upload": 2,
+    "nonlinear_transform": 2
+  },
+  "operacoes": [
+    {
+      "operation": "upload",
+      "parameters": {
+        "filename": "mclovin.png"
+      },
+      "timestamp": "2025-11-04T23:12:28.347960",
+      "user_type": "operador"
+    },
+    {
+      "operation": "nonlinear_transform",
+      "parameters": {
+        "type": "log",
+        "gamma": 0.6,
+        "c_log": 0.5
+      },
+      "timestamp": "2025-11-04T23:12:35.988285",
+      "user_type": "operador"
+    },
+    {
+      "operation": "upload",
+      "parameters": {
+        "filename": "paisagem_clara.png"
+      },
+      "timestamp": "2025-11-04T23:12:42.677010",
+      "user_type": "operador"
+    },
+    {
+      "operation": "nonlinear_transform",
+      "parameters": {
+        "type": "gamma",
+        "gamma": 1.6,
+        "c_log": 0.5
+      },
+      "timestamp": "2025-11-04T23:12:50.502918",
+      "user_type": "operador"
+    }
+  ]
+}
