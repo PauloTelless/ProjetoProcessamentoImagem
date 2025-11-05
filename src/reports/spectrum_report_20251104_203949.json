@@ -1,0 +1,18 @@
+{
+  "sistema": "SPECTRUM - Ferramenta de Análise e Correção de Imagens",
+  "data_geracao": "2025-11-04 20:39:49",
+  "total_operacoes": 1,
+  "tipos_operacao": {
+    "upload": 1
+  },
+  "operacoes": [
+    {
+      "operation": "upload",
+      "parameters": {
+        "filename": "mclovin.png"
+      },
+      "timestamp": "2025-11-04T20:39:47.891438",
+      "user_type": "operador"
+    }
+  ]
+}
