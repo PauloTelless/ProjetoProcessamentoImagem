@@ -20,7 +20,6 @@ class SpectrumImageProcessor:
         print("=" * 60)
 
     def list_images(self, folder="img"):
-        """Lista imagens disponíveis na pasta"""
         if not os.path.exists(folder):
             os.makedirs(folder)
             print(f"Pasta '{folder}' criada. Adicione imagens para continuar.")
@@ -37,7 +36,6 @@ class SpectrumImageProcessor:
         return imagens
 
     def upload_image(self, folder="img"):
-        """Seleciona uma imagem da pasta img/"""
         imagens = self.list_images(folder)
         if not imagens:
             return False
@@ -91,7 +89,6 @@ class SpectrumImageProcessor:
 
         print("\n--- Transformação Não-Linear ---")
         tipo = input("Tipo (gamma/log): ").strip().lower() or "gamma"
-
         if tipo not in ["gamma", "log"]:
             print("Tipo inválido.")
             return
@@ -100,12 +97,9 @@ class SpectrumImageProcessor:
         c_log = float(input("Constante Log (>=0.1): ") or 1.0)
         img_normalized = self.current_image.astype(np.float32) / 255.0
 
-        if tipo == "gamma":
-            processed = np.power(img_normalized, gamma)
-        else:
-            processed = c_log * np.log1p(img_normalized)
-
+        processed = np.power(img_normalized, gamma) if tipo == "gamma" else c_log * np.log1p(img_normalized)
         self.processed_image = np.clip(processed * 255, 0, 255).astype(np.uint8)
+
         print("✅ Transformação não-linear aplicada.")
         self._log_operation("nonlinear_transform", {"type": tipo, "gamma": gamma, "c_log": c_log})
         self.analyze_histogram()
@@ -121,11 +115,7 @@ class SpectrumImageProcessor:
         if len(self.current_image.shape) == 3:
             ycrcb = cv2.cvtColor(self.current_image, cv2.COLOR_BGR2YCrCb)
             y = ycrcb[:, :, 0]
-            if metodo == "adaptive":
-                clahe = cv2.createCLAHE(2.0, (8, 8))
-                y_eq = clahe.apply(y)
-            else:
-                y_eq = cv2.equalizeHist(y)
+            y_eq = cv2.createCLAHE(2.0, (8, 8)).apply(y) if metodo == "adaptive" else cv2.equalizeHist(y)
             ycrcb[:, :, 0] = y_eq
             self.processed_image = cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
         else:
@@ -139,14 +129,19 @@ class SpectrumImageProcessor:
         if self.original_image is None:
             print("⚠ Nenhuma imagem carregada!")
             return
-        fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-        ax[0].imshow(cv2.cvtColor(self.original_image, cv2.COLOR_BGR2RGB))
-        ax[0].set_title("Original")
-        ax[0].axis("off")
-        if self.processed_image is not None:
-            ax[1].imshow(cv2.cvtColor(self.processed_image, cv2.COLOR_BGR2RGB))
-            ax[1].set_title("Processada")
-            ax[1].axis("off")
+        fig, ax = plt.subplots(2, 2, figsize=(12, 8))
+        imagens = [self.original_image, self.processed_image]
+        titulos = ["Original", "Processada"]
+
+        for i, img in enumerate(imagens):
+            if img is not None:
+                ax[0, i].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+                ax[0, i].set_title(titulos[i])
+                ax[0, i].axis("off")
+                for canal, cor in zip(cv2.split(img), ['r', 'g', 'b']):
+                    ax[1, i].hist(canal.ravel(), 256, [0, 256], color=cor, alpha=0.5)
+                ax[1, i].set_title(f"Histograma {titulos[i]}")
+        plt.tight_layout()
         plt.show()
 
     def comparative_visualization(self):
