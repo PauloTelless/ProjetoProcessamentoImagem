@@ -66,7 +66,7 @@ O ciclo de execução do módulo segue uma sequência lógica e controlada:
 
 ## 💾 Execução Rápida
 
-```bash
+```bash´´´
 # Clonar o repositório
 git clone https://github.com/PauloTelless/ProjetoProcessamentoImagem.git
 cd ProjetoProcessamentoImagem
@@ -80,3 +80,11 @@ pip install -r requirements.txt
 
 # Executar o módulo principal
 python main.py
+
+
+---
+
+## 📹 Video de Demonstração
+
+https://youtu.be/Vsh-NV0My-I
+
