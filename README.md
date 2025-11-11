@@ -64,6 +64,12 @@ O ciclo de execução do módulo segue uma sequência lógica e controlada:
 
 ---
 
+## 📹 Video de Demonstração
+
+https://youtu.be/Vsh-NV0My-I
+
+---
+
 ## 💾 Execução Rápida
 
 ```bash´´´
@@ -84,7 +90,4 @@ python main.py
 
 ---
 
-## 📹 Video de Demonstração
-
-https://youtu.be/Vsh-NV0My-I
 
