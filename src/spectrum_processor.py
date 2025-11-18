@@ -28,7 +28,7 @@ class SpectrumImageProcessor:
         imagens = [f for f in os.listdir(folder)
                    if f.lower().endswith(('.jpg', '.png', '.jpeg', '.bmp', '.tiff'))]
         if not imagens:
-            print(f"⚠ Nenhuma imagem encontrada na pasta '{folder}'.")
+            print(f"Nenhuma imagem encontrada na pasta '{folder}'.")
             return []
         print("\nImagens disponíveis:")
         for i, nome in enumerate(imagens, 1):
@@ -43,7 +43,7 @@ class SpectrumImageProcessor:
             escolha = int(input("\nDigite o número da imagem desejada: ").strip())
             nome_arquivo = imagens[escolha - 1]
         except (ValueError, IndexError):
-            print("❌ Opção inválida.")
+            print("Opção inválida.")
             return False
 
         caminho = os.path.join(folder, nome_arquivo)
@@ -52,7 +52,7 @@ class SpectrumImageProcessor:
             self.original_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
             self.current_image = self.original_image.copy()
             self.processed_image = None
-            print(f"✅ Imagem '{nome_arquivo}' carregada com sucesso ({self.original_image.shape})")
+            print(f"Imagem '{nome_arquivo}' carregada com sucesso ({self.original_image.shape})")
             self._log_operation("upload", {"filename": nome_arquivo})
             return True
         except Exception as e:
@@ -61,9 +61,10 @@ class SpectrumImageProcessor:
 
     def linear_transformations(self, brightness=0, contrast=1.0):
         if self.current_image is None:
-            print("⚠ Nenhuma imagem carregada!")
+            print("Nenhuma imagem carregada.")
             return
-        print("\n--- Transformação Linear ---")
+
+        print("\nTransformação Linear")
         try:
             brightness = float(input("Brilho (-100 a 100): ") or 0)
             contrast = float(input("Contraste (0.1 a 3.0): ") or 1.0)
@@ -78,16 +79,16 @@ class SpectrumImageProcessor:
         transformed = contrast * img_float + brightness
         self.processed_image = np.clip(transformed, 0, 255).astype(np.uint8)
 
-        print("✅ Transformação linear aplicada.")
+        print("Transformação linear aplicada.")
         self._log_operation("linear_transform", {"brightness": brightness, "contrast": contrast})
         self.analyze_histogram()
 
     def nonlinear_transformations(self):
         if self.current_image is None:
-            print("⚠ Nenhuma imagem carregada!")
+            print("Nenhuma imagem carregada.")
             return
 
-        print("\n--- Transformação Não-Linear ---")
+        print("\nTransformação Não-Linear")
         tipo = input("Tipo (gamma/log): ").strip().lower() or "gamma"
         if tipo not in ["gamma", "log"]:
             print("Tipo inválido.")
@@ -95,21 +96,21 @@ class SpectrumImageProcessor:
 
         gamma = float(input("Gamma (0.1-3.0): ") or 1.0)
         c_log = float(input("Constante Log (>=0.1): ") or 1.0)
-        img_normalized = self.current_image.astype(np.float32) / 255.0
 
+        img_normalized = self.current_image.astype(np.float32) / 255.0
         processed = np.power(img_normalized, gamma) if tipo == "gamma" else c_log * np.log1p(img_normalized)
         self.processed_image = np.clip(processed * 255, 0, 255).astype(np.uint8)
 
-        print("✅ Transformação não-linear aplicada.")
+        print("Transformação não-linear aplicada.")
         self._log_operation("nonlinear_transform", {"type": tipo, "gamma": gamma, "c_log": c_log})
         self.analyze_histogram()
 
     def histogram_equalization(self):
         if self.current_image is None:
-            print("⚠ Nenhuma imagem carregada!")
+            print("Nenhuma imagem carregada.")
             return
 
-        print("\n--- Equalização de Histograma ---")
+        print("\nEqualização de Histograma")
         metodo = input("Método (global/adaptive): ").strip().lower() or "global"
 
         if len(self.current_image.shape) == 3:
@@ -121,14 +122,15 @@ class SpectrumImageProcessor:
         else:
             self.processed_image = cv2.equalizeHist(self.current_image)
 
-        print("✅ Equalização concluída.")
+        print("Equalização concluída.")
         self._log_operation("histogram_equalization", {"method": metodo})
         self.analyze_histogram()
 
     def analyze_histogram(self):
         if self.original_image is None:
-            print("⚠ Nenhuma imagem carregada!")
+            print("Nenhuma imagem carregada.")
             return
+
         fig, ax = plt.subplots(2, 2, figsize=(12, 8))
         imagens = [self.original_image, self.processed_image]
         titulos = ["Original", "Processada"]
@@ -140,14 +142,16 @@ class SpectrumImageProcessor:
                 ax[0, i].axis("off")
                 for canal, cor in zip(cv2.split(img), ['r', 'g', 'b']):
                     ax[1, i].hist(canal.ravel(), 256, [0, 256], color=cor, alpha=0.5)
-                ax[1, i].set_title(f"Histograma {titulos[i]}")
+                ax[1, i].set_title("Histograma " + titulos[i])
+
         plt.tight_layout()
         plt.show()
 
     def comparative_visualization(self):
         if self.original_image is None or self.processed_image is None:
-            print("⚠ Execute uma transformação antes.")
+            print("Nenhuma transformação aplicada ainda.")
             return
+
         alpha = float(input("Porcentagem da imagem processada (0 a 1): ") or 0.5)
         alpha = np.clip(alpha, 0, 1)
         blended = cv2.addWeighted(self.original_image, 1 - alpha, self.processed_image, alpha, 0)
@@ -158,14 +162,17 @@ class SpectrumImageProcessor:
 
     def generate_report(self):
         if not self.images_history:
-            print("⚠ Nenhuma operação registrada!")
+            print("Nenhuma operação registrada.")
             return
+
         agora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         os.makedirs("reports", exist_ok=True)
         json_file = os.path.join("reports", f"spectrum_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+
         tipos = {}
         for op in self.images_history:
             tipos[op["operation"]] = tipos.get(op["operation"], 0) + 1
+
         report = {
             "sistema": "SPECTRUM - Ferramenta de Análise e Correção de Imagens",
             "data_geracao": agora,
@@ -173,9 +180,11 @@ class SpectrumImageProcessor:
             "tipos_operacao": tipos,
             "operacoes": self.images_history
         }
+
         with open(json_file, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
-        print(f"✅ Relatório gerado em '{json_file}'")
+
+        print(f"Relatório gerado em '{json_file}'")
 
     def _log_operation(self, op, params):
         self.images_history.append({
@@ -184,3 +193,66 @@ class SpectrumImageProcessor:
             "timestamp": datetime.now().isoformat(),
             "user_type": self.user_type
         })
+
+    def dynamic_parameter_adjustment(self):
+        if self.current_image is None:
+            print("Nenhuma imagem carregada.")
+            return
+
+        print("\nModo de Ajuste Dinâmico")
+        print("Pressione ESC ou feche a janela para sair.\n")
+
+        img = self.current_image.copy()
+
+        cv2.namedWindow("Ajuste Dinâmico", cv2.WINDOW_NORMAL)
+
+        cv2.createTrackbar("Brilho", "Ajuste Dinâmico", 100, 200, lambda x: None)
+        cv2.createTrackbar("Contraste", "Ajuste Dinâmico", 10, 30, lambda x: None)
+        cv2.createTrackbar("Gamma", "Ajuste Dinâmico", 10, 30, lambda x: None)
+        cv2.createTrackbar("Log C", "Ajuste Dinâmico", 10, 50, lambda x: None)
+        cv2.createTrackbar("Inversão", "Ajuste Dinâmico", 0, 1, lambda x: None)
+
+        while True:
+            if cv2.getWindowProperty("Ajuste Dinâmico", cv2.WND_PROP_VISIBLE) < 1:
+                cv2.destroyAllWindows()
+                print("Voltando ao menu principal.")
+                return
+
+            brilho = cv2.getTrackbarPos("Brilho", "Ajuste Dinâmico") - 100
+            contraste = cv2.getTrackbarPos("Contraste", "Ajuste Dinâmico") / 10
+            gamma = cv2.getTrackbarPos("Gamma", "Ajuste Dinâmico") / 10
+            c_log = cv2.getTrackbarPos("Log C", "Ajuste Dinâmico") / 10
+            invert_flag = cv2.getTrackbarPos("Inversão", "Ajuste Dinâmico")
+
+            img_float = img.astype(np.float32)
+            img_lin = contraste * img_float + brilho
+            img_lin = np.clip(img_lin, 0, 255) / 255.0
+
+            img_gamma = np.power(img_lin, gamma)
+            img_log = c_log * np.log1p(img_lin)
+            img_log = np.clip(img_log, 0, 1)
+
+            img_proc = np.clip((img_gamma + img_log) / 2, 0, 1)
+
+            if invert_flag == 1:
+                img_proc = 1 - img_proc
+
+            img_show = (img_proc * 255).astype(np.uint8)
+
+            cv2.imshow("Ajuste Dinâmico", img_show)
+
+            if cv2.waitKey(10) & 0xFF == 27:
+                break
+
+        cv2.destroyAllWindows()
+
+        self.processed_image = img_show
+        self._log_operation("dynamic_adjustment", {
+            "brightness": brilho,
+            "contrast": contraste,
+            "gamma": gamma,
+            "c_log": c_log,
+            "invert": invert_flag
+        })
+
+        print("Ajuste dinâmico finalizado.")
